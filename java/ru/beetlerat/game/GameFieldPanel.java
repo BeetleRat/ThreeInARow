@@ -6,7 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class GameFieldPanel extends JPanel {
-    private Ball ball;
+    private Ball balls[];
 
 
     GameFieldPanel(){
@@ -15,7 +15,10 @@ public class GameFieldPanel extends JPanel {
         // Установка границ компонента красными жирностью 5
         setBorder(BorderFactory.createLineBorder(Color.RED,5));
 
-        ball=new Ball(this);
+        balls=new Ball[10];
+        for(int i=0;i<10;i++){
+            balls[i]=new Ball(this,15+i*35,100);
+        }
     }
     // Переопределить метод отрисовки компанента
     protected void paintComponent(Graphics brush){
@@ -24,7 +27,8 @@ public class GameFieldPanel extends JPanel {
         // а затем рисуем на отрисованном компоненте
 
         // Отрисовка игрового поля
-        ball.paintBall(brush);
-
+        for (Ball ball:balls){
+            ball.paintBall(brush);
+        }
     }
 }

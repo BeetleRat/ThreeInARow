@@ -30,7 +30,7 @@ public class Ball implements Runnable {
     private boolean isBallDragged;
 
 
-    public Ball(JPanel parent){
+    public Ball(JPanel parent, int x, int y){
         // Имя шари
         ballName="Abstract Ball";
         // Создание паралельного потока
@@ -38,8 +38,8 @@ public class Ball implements Runnable {
         // Сохранение панели в которой отрисовывается шар
         this.parent=parent;
         // Установка базовых параметров шара
-        x=100;
-        y=100;
+        this.x=x;
+        this.y=y;
         width=30;
         height=30;
         // Установка границ шара
