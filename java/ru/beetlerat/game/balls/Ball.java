@@ -5,55 +5,126 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class Ball implements Runnable {
+// Абстрактный класс
+// выполняющийся в паралельном потоке
+// реализующий перемещение шра по игровому полю
+abstract class Ball implements Runnable {
+    // Константы типов шаров
+    public static final int YELLOW_BALL = 5;
+    public static final int PINK_BALL = 4;
+    public static final int GREEN_BALL = 3;
+    public static final int ORANGE_BALL = 2;
+    public static final int BLUE_BALL = 1;
+    public static final int BLACK_BALL = 0;
+
+    // Фабричный метод создания шара определенного типа
+    public static Ball createBall(int ballType, Balls anotherBalls, JPanel canvas, int row, int column, int id) {
+        switch (ballType) {
+            case BLACK_BALL:
+                return new BlackBall(anotherBalls, canvas, row, column, id);
+            case BLUE_BALL:
+                return new BlueBall(anotherBalls, canvas, row, column, id);
+            case ORANGE_BALL:
+                return new OrangeBall(anotherBalls, canvas, row, column, id);
+            case GREEN_BALL:
+                return new GreenBall(anotherBalls, canvas, row, column, id);
+            case PINK_BALL:
+                return new PinkBall(anotherBalls, canvas, row, column, id);
+            case YELLOW_BALL:
+                return new YellowBall(anotherBalls, canvas, row, column, id);
+            default:
+                System.out.println("Не существует шара типа: " + ballType);
+                return null;
+        }
+    }
+
+
     // Объект потока
-    private Thread thread;
+    private final Thread thread;
     // Панель в которой отрисовывается шар
     private JPanel canvas;
-    // Класс взаимодействия с другими шариками
-    Balls anotherBalls;
-
-
-    private int ballName;
+    // Классы взаимодействия с другими шариками
+    private Balls ballsGrid;
+    private Ball upBall;
+    private Ball downBall;
+    private Ball leftBall;
+    private Ball rightBall;
 
     // Параметры шара
-    private int x;
-    private int y;
-    private int width;
-    private int height;
+    private int ballName;
+    // Строка и столбец в таблице шаров
+    private int row;
+    private int column;
+    // Координаты строки и столбца в таблице шаров
+    private int rowY;
+    private int columnX;
+    private int startX; // х в котором шар был взят мышкой
+    private int startY; // y в котором шар был взят мышкой
+    // Координаты отрисовки шара и его размеры
+    protected int x;
+    protected int y;
+    protected int width;
+    protected int height;
 
     // Границы игрового поля
     private int floor;
     private int ceil;
     private int rightBorder;
     private int leftBorder;
+    // Отступы от края игрового поля
+    private int paddingX;
+    private int paddingY;
+
+    private boolean isExists;
+    protected boolean isBallDragged;
+    protected boolean isTransported;// Перемещается ли данный шар другим шаром
+    private int isBallAvailable; // 0-шар еще не двигался 1-шар уже пришел в нужную точку 2 - шар еще движется в нужную точку
+    private int isYChange; // 0 -шар стоит на месте/ 1-шар перемещается по Y/ -1 - шар перемещается по Х
 
 
-    private boolean isBallExist;
-    private boolean isBallDragged;
-
-
-     Ball(Balls anotherBalls, JPanel canvas, int x, int y,int id){
+    // Конструктор
+    Ball(Balls ballsGrid, JPanel canvas, int row, int column, int id) {
         // Имя шарика
-        ballName=id;
+        this.ballName = id;
         // Создание паралельного потока
-        thread=new Thread(this,"Ball "+ballName+" thread");
+        thread = new Thread(this, "Ball " + ballName + " thread");
         // Сохранение панели в которой отрисовывается шар
-        this.canvas=canvas;
-        this.anotherBalls=anotherBalls;
-        // Установка базовых параметров шара
-        this.x=x;
-        this.y=y;
-        width=30;
-        height=30;
-        // Установка границ шара
-        floor=this.canvas.getSize().height-height-20;
-        ceil=0+height/2;
-        rightBorder=this.canvas.getSize().width-width;
-        leftBorder=0+width/2;
+        this.canvas = canvas;
+        // Сохранение игрового поля в котором находится шар
+        this.ballsGrid = ballsGrid;
+        // Обнуление соседей шара
+        this.upBall = null;
+        this.downBall = null;
+        this.leftBall = null;
+        this.rightBall = null;
 
-        isBallExist=true;
-        isBallDragged =false;
+        // Установка границ шара
+        this.floor = this.canvas.getSize().height - height - 20;
+        this.ceil = 0 + height / 2;
+        this.rightBorder = this.canvas.getSize().width - width;
+        this.leftBorder = 0 + width / 2;
+        // Установка отступов от края игрового поля
+        this.paddingX = 35;
+        this.paddingY = 35;
+
+        // Установка базовых параметров шара
+        this.width = 30;
+        this.height = 30;
+        // Установка изночальных координат по положению шара в таблице шаров
+        setRow(row);
+        setColumn(column);
+        this.y = rowY;
+        this.x = columnX;
+        this.startX = columnX;
+        this.startY = rowY;
+
+        this.isExists = true; // Шар создан - значит существует
+        // При создании шар никуда не перемещается
+        this.isBallDragged = false;
+        this.isTransported = false;
+        this.isBallAvailable = 0; // Шар еще не двигался
+        this.isYChange = 0;// Шар стоит на месте
+
         // Добавление слушателей
         addListeners();
 
@@ -62,41 +133,207 @@ public class Ball implements Runnable {
     }
 
     // Добавление слушателей
-    private void addListeners(){
+    private void addListeners() {
         // Добавление слушателя мыши через адаптер
-        MouseAdapter mouseListener= new MouseAdapter() {
+        MouseAdapter mouseListener = new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
-                if(e.getX()>x&&e.getX()<x+width&&e.getY()<y+height&&e.getY()>y){
-                    isBallDragged =true;
+            public void mousePressed(MouseEvent mouse) {
+                // Шарик отрисовыватся по координатам слева сверху, а мышкой мы должны перетаскивать его за центр.
+                // По этому для удобства приводим координаты левого верхнего края к центральным координатам
+                int centerX = x + width / 2;
+                int centerY = y + height / 2;
+                // Если при нажатии на мышь курсор находится внутри шара и таблица шаров доступна для изменения
+                if (mouse.getX() > (centerX - width / 2) && mouse.getX() < (centerX + width / 2) &&
+                        mouse.getY() > (centerY - height / 2) && mouse.getY() < (centerY + height / 2) &&
+                        ballsGrid.isFieldAvailable()) {
+                    isBallDragged = true;
+                    // Запоминаем координаты из которых взят шар
+                    startX = columnX;
+                    startY = rowY;
+                    // Установить текущий шар отрисовываемым поверх других
+                    ballsGrid.setDraggedBall(row, column);
+                    //System.out.println("Взят шар: "+ballName+" типа: "+getType()+" startX: "+startX+" startY: "+startY);
                 }
             }
 
             @Override
-            public void mousePressed(MouseEvent e) {
-                if(e.getX()>x&&e.getX()<x+width&&e.getY()<y+height&&e.getY()>y){
-                    isBallDragged =true;
+            public void mouseReleased(MouseEvent mouse) {
+                if (isBallDragged) {
+                    isBallDragged = false;
+                    isBallAvailable = 0; // Шар еще не двигался
+                    ballsGrid.setEndTurnPhase(true); // Запустить процесс конца хода
+                }
+                if (isTransported) {
+                    isTransported = false;
+                    isBallAvailable = 0; // Шар еще не двигался
+                }
+
+            }
+
+            @Override
+            public void mouseDragged(MouseEvent mouse) {
+                if (isBallDragged) {
+                    // Шарик отрисовыватся по координатам слева сверху, а мышкой мы должны перетаскивать его за центр.
+                    // По этому для удобства приводим центральные координаты к координатам левого верхнего края
+                    int mouseX = mouse.getX() - width / 2;
+                    int mouseY = mouse.getY() - height / 2;
+                    // Изменяем координаты самого шара, на координаты соответствующие текущему положению курсора
+                    changeCoords(mouseX, mouseY);
+                    // Проверяем не вылезли ли x и y за границы игрового поля
+                    checkBorders();
+                    // Изменяем координаты соседей шара, на координаты соответствующие текущему положению самого шара
+                    moveNeighbor();
+
+                    canvas.repaint();// Перерисовываем изображение согласно новым координатам
                 }
             }
 
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                isBallDragged =false;
+            // ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ АНОНИМНОГО КЛАССА
+            private void moveNeighbor() {
+                int rangeX = 0; // Положительное расстояние на которое передвинулся шар по х
+                int signX = 0; // -1 движемся вправо/ 1 движемся влево / 0 перемещение по х не происходит
+                int rangeY = 0; // Положительное расстояние на которое передвинулся шар по Y
+                int signY = 0;    // -1 движемся вниз/ 1 движемся вверх / 0 перемещение по y не происходит
+                Ball neighbor = null; // Передвигаемый сосед
+                // Если шар передвигается вправао
+                if (x > columnX) {
+                    // Вычисляем положительное расстояние на которое передвинулся шар
+                    rangeX = Math.abs(x - columnX);
+                    neighbor = rightBall;
+                    signX = -1;
+                } else {
+                    // Если шар передвигается влево
+                    if (x < columnX) {
+                        // Вычисляем положительное расстояние на которое передвинулся шар
+                        rangeX = Math.abs(x - columnX);
+                        neighbor = leftBall;
+                        signX = 1;
+                    } else {
+                        // Если шар передвигается вниз
+                        if (y > rowY) {
+                            // Вычисляем положительное расстояние на которое передвинулся шар
+                            rangeY = Math.abs(y - rowY);
+                            neighbor = downBall;
+                            signY = -1;
+
+                        } else {
+                            // Если шар передвигается вверх
+                            if (y < rowY) {
+                                // Вычисляем положительное расстояние на которое передвинулся шар
+                                rangeY = Math.abs(y - rowY);
+                                neighbor = upBall;
+                                signY = 1;
+                            }
+                        }
+                    }
+                }
+                // Если существует передвигаемый сосед
+                if (neighbor != null) {
+                    // Устанавливаем ему флаг перемещения
+                    neighbor.setTransported(true);
+                    // Если происходит перемещение по х
+                    if (signX != 0) {
+                        // Если шар встал на место соседа, или дальше
+                        if ((-1) * signX * neighbor.getColumnX() + signX * x <= 0) {
+                            // Поменять шар и соседа местами в таблице шаров
+                            ballsGrid.swapBalls(row, column, neighbor.getRow(), neighbor.getColumn(), false);
+                        } else {
+                            // Иначе изменить координаты соседа на сдвиг от его положения на range в сторону шара
+                            neighbor.setX(neighbor.getColumnX() + signX * rangeX);
+                        }
+                    }
+                    // Если происходит перемещение по х
+                    if (signY != 0) {
+                        // Если шар встал на место соседа, или дальше
+                        if ((-1) * signY * neighbor.getRowY() + signY * y <= 0) {
+                            // Поменять шар и соседа местами в таблице шаров
+                            ballsGrid.swapBalls(row, column, neighbor.getRow(), neighbor.getColumn(), false);
+                        } else {
+                            // Иначе изменить координаты соседа на сдвиг от его положения на range в сторону шара
+                            neighbor.setY(neighbor.getRowY() + signY * rangeY);
+                        }
+                    }
+                }
             }
 
-            @Override
-            public void mouseDragged(MouseEvent e) {
-                if(isBallDragged){
-                    if(e.getX()-width/2>leftBorder&&e.getX()-width/2<rightBorder){
-                        x=e.getX()-width/2;
+            private void changeCoords(int mouseX, int mouseY) {
+                // Расстояние пройденное шаром от точки старта до положения мышы
+                int xRange;
+                int yRange;
+                if (mouseX > startX) {
+                    xRange = mouseX - startX;
+                } else {
+                    xRange = startX - mouseX;
+                }
+                if (mouseY > startY) {
+                    yRange = mouseY - startY;
+                } else {
+                    yRange = startY - mouseY;
+                }
+                // Если шар стоит на месте
+                if (isYChange == 0) {
+                    // Проверяем изменяют ли его горизонтальное положение
+                    if (xRange > yRange + 1) {
+                        isYChange = -1;
+                        x = mouseX;
+                        y = startY;
                     }
-                    if(e.getY()-height/2>ceil&&e.getY()-height/2<floor){
-                        y=e.getY()-height/2;
+                    // Или же изменяют его вертикальное положение
+                    if (xRange < yRange - 1) {
+                        isYChange = 1;
+                        x = startX;
+                        y = mouseY;
                     }
-                    canvas.repaint();
+                } else {
+                    // Если шар перемещается по Y
+                    if (isYChange == 1) {
+                        // Пришел ли шар в положение из которого был взят
+                        if (yRange <= 2) {
+                            isYChange = 0;// Шар стоит на месте
+                            ballsGrid.reverseSwap(); // Вернуть на место все перемещенные в этом ходу шары
+                            // Установить изначальные координаты отрисовки шара
+                            x = startX;
+                            y = startY;
+                        } else {
+                            // Сохранить координату x и изменить y
+                            x = startX;
+                            y = mouseY;
+                        }
+                        // Если шар перемещается по Y
+                    } else {
+                        // Пришел ли шар в положение из которого был взят
+                        if (xRange <= 2) {
+                            isYChange = 0;// Шар стоит на месте
+                            ballsGrid.reverseSwap(); // Вернуть на место все перемещенные в этом ходу шары
+                            // Установить изначальные координаты отрисовки шара
+                            x = startX;
+                            y = startY;
+                        } else {
+                            // Сохранить координату y и изменить x
+                            x = mouseX;
+                            y = startY;
+                        }
+                    }
+                }
+            }
+
+            private void checkBorders() {
+                // Проверка помещаются ли x и y в границы игрового поля
+                if (x > rightBorder) {
+                    x = rightBorder;
+                }
+                if (x < leftBorder) {
+                    x = leftBorder;
+                }
+                if (y < ceil) {
+                    y = ceil;
+                }
+                if (y > floor) {
+                    y = floor;
                 }
             }
         };
+
         // Добавление слушателя для мыши
         canvas.addMouseListener(mouseListener);
         canvas.addMouseMotionListener(mouseListener);
@@ -105,31 +342,70 @@ public class Ball implements Runnable {
     // Метод выполняемый в паралельном потоке
     @Override
     public void run() {
-        // До тех пор, пока шарик существует
-        while (isBallExist) {
+        while (true) {
             try {
-                // Приостановка потока для плавности
-                Thread.sleep(10);
-                // Падение шарика вниз
-                if (y < floor&&!isBallDragged&&!anotherBalls.isIntersect(ballName)) {
-                    y++;
-                    canvas.repaint();
-                }
+                Thread.sleep(5); // Ожидание 5 милисекунд
+
             } catch (InterruptedException e) {
-                System.out.println("Ошибка в потоке: "+e);
+                System.out.println("Ошибка потока: " + this.thread.getName() + "  " + e);
+            }
+            // Если шар не перемещается мышкой
+            if (!isBallDragged && !isTransported) {
+                // Если он стоит на нужном месте
+                if (y == rowY && x == columnX) {
+                    // Если шар двигался и только что встал в нужное место
+                    if (isBallAvailable == 2) {
+                        isBallAvailable = 1;// Шар уже пришел в нужную точку
+                        ballsGrid.incStandBalls(); // Увеличить в таблице количество шаров на своем месте
+                        ballsGrid.checkAvailable(); // Проверить все ли шары в таблице на своем месте
+                        // Если шара уже не существует
+                        if (!isExists) {
+                            break;  // Выйти из цикла потока
+                        }
+                    }
+                    // Если шар не двигался
+                    if (isBallAvailable == 0) {
+                        isBallAvailable = 1;// Шар уже пришел в нужную точку
+                        ballsGrid.checkAvailable();// Проверить все ли шары в таблице на своем месте
+                        // Если шара уже не существует
+                        if (!isExists) {
+                            break;  // Выйти из цикла потока
+                        }
+                    }
+
+                }
+                // Если шар не находится на своем месте
+                else {
+                    // Если шар не двигался
+                    if (isBallAvailable == 0) {
+                        isBallAvailable = 2;// Шар движется в нужную точку
+                        ballsGrid.decStandBalls(); // Уменьшить в таблице количество шаров на своем месте
+                        ballsGrid.checkAvailable(); // Проверить что не все шары в таблице на своем месте
+                    }
+                    // Смещение на 1 по х и по y в сторону нужной точки
+                    if (x > columnX) {
+                        x--;
+                        canvas.repaint();
+                    }
+                    if (x < columnX) {
+                        x++;
+                        canvas.repaint();
+                    }
+                    if (y > rowY) {
+                        y--;
+                        canvas.repaint();
+                    }
+                    if (y < rowY) {
+                        y++;
+                        canvas.repaint();
+                    }
+                }
             }
         }
-        // После уничтожения шарика перерисовать панель без него
-        canvas.repaint();
+
     }
 
     // Геттеры
-    public int getX() {
-        return x;
-    }
-    public int getY() {
-        return y;
-    }
     public int getWidth() {
         return width;
     }
@@ -139,6 +415,27 @@ public class Ball implements Runnable {
     public int getBallName() {
         return ballName;
     }
+    public int getRow() {
+        return row;
+    }
+    public int getColumn() {
+        return column;
+    }
+    public int getRowY() {
+        return rowY;
+    }
+    public int getColumnX() {
+        return columnX;
+    }
+    public int getStartX() {
+        return startX;
+    }
+    public int getStartY() {
+        return startY;
+    }
+    public boolean isExists() {
+        return isExists;
+    }
 
     // Сеттеры
     public void setX(int x) {
@@ -147,59 +444,73 @@ public class Ball implements Runnable {
     public void setY(int y) {
         this.y = y;
     }
-    public void setWidth(int width) {
-        this.width = width;
-    }
-    public void setHeight(int height) {
-        this.height = height;
-    }
     public void setBallName(int ballName) {
         this.ballName = ballName;
     }
-
-    // Уничтожение шарика
-    void destroyBall(){
-        isBallExist=false;
-        x=-1;
-        y=-1;
-        width=0;
-        height=0;
+    public void setTransported(boolean transported) {
+        isTransported = transported;
     }
-    // Отрисовка шарика
-    void paintBall(Graphics brush){
-        brush.fillOval(x,y,width,height);
+    public void setUpBall(Ball upBall) {
+        this.upBall = upBall;
+    }
+    public void setDownBall(Ball downBall) {
+        this.downBall = downBall;
+    }
+    public void setLeftBall(Ball leftBall) {
+        this.leftBall = leftBall;
+    }
+    public void setRightBall(Ball rightBall) {
+        this.rightBall = rightBall;
+    }
+    public void setRow(int row) {
+        this.row = row; // Сохраняем строку
+        // Пересчитываем координаты текущей строки
+        this.rowY = paddingY + this.row * height;
+        // Если мы установили новую строку из-вне,
+        // значит шар изменил свое положение в таблице,
+        // значит он не может больше быть перетаскиваемым,
+        // так как перетаскивался шар с дргуого места в таблице
+        this.isTransported = false;
+
+    }
+    public void setColumn(int column) {
+        this.column = column; // Сохраняем стобец
+        // Пересчитываем координаты текущего столбца
+        columnX = paddingX + this.column * width;
+        // Если мы установили новую строку из-вне,
+        // значит шар изменил свое положение в таблице,
+        // значит он не может больше быть перетаскиваемым,
+        // так как перетаскивался шар с дргуого места в таблице
+        this.isTransported = false;
+    }
+    public void setExists(boolean exists) {
+        isExists = exists;
+        // Если шар больше не существует
+        if (!isExists) {
+            // Выкидываем его за поле, что бы перед уничтожением он успел увеличить в таблице количество шаров на своем месте
+            // но при этом пользователь не мог случайно с ним взаимодействовать
+            this.upBall = null;
+            this.downBall = null;
+            this.leftBall = null;
+            this.rightBall = null;
+            this.width = 0;
+            this.height = 0;
+            this.paddingX = 0;
+            this.paddingY = 0;
+            this.startY=row;
+            this.startX=column;
+            setRow(-10);
+            setColumn(-10);
+            this.y = rowY;
+            this.x = columnX;
+        }
     }
 
-    boolean isIntersect(Ball anotherBall){
+    abstract void paintBall(Graphics brush);
 
-         int thisLeftX=x-width/2;
-         int thisRightX=x+width/2;
-         int thisFloorY=y+height/2;
-         int thisCeilY=y-height/2;
-         if(
-                 isPointInsideTheBall(thisLeftX,thisCeilY,anotherBall) ||
-                 isPointInsideTheBall(thisRightX,thisCeilY,anotherBall)||
-                 isPointInsideTheBall(thisRightX,thisFloorY,anotherBall)||
-                 isPointInsideTheBall(thisLeftX,thisFloorY,anotherBall)
-         ){
-             return true;
-         }
+    abstract int getType();
 
+    abstract int getPrice();
 
-         return false;
-     }
-
-     private boolean isPointInsideTheBall(int x,int y, Ball ball){
-         final int anotherLeftX=ball.getX()-ball.getWidth()/2;
-         final int anotherRightX=ball.getX()+ball.getWidth()/2;
-         final int anotherFloorY=ball.getY()+ball.getHeight()/2;
-         final int anotherCeilY=ball.getY()-ball.getHeight()/2;
-         // System.out.println("anotherLeftX: "+anotherLeftX+" anotherRightX: "+anotherRightX+" anotherFloorY: "+anotherFloorY+" anotherCeilY: "+anotherCeilY+"; x:"+x+" y:"+y);
-         if(x<anotherRightX&&x>anotherLeftX&&y>anotherCeilY&&y<anotherFloorY){
-             //System.out.println("Ball "+ball.getBallName()+" is intersect "+ballName);
-             return true;
-         }
-         return false;
-     }
-
+    abstract void setBright(boolean isBright);
 }

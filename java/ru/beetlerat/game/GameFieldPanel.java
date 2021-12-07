@@ -13,12 +13,10 @@ public class GameFieldPanel extends JPanel {
 
     GameFieldPanel(){
         // Установить размеры панели
-        setSize(new Dimension(380,380));
+        setSize(new Dimension(380,400));
         // Установка границ компонента красными жирностью 5
         setBorder(BorderFactory.createLineBorder(Color.RED,5));
         balls=new Balls(this);
-
-
     }
     // Переопределить метод отрисовки компанента
     protected void paintComponent(Graphics brush){
