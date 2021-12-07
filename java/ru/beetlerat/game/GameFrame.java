@@ -20,7 +20,7 @@ public class GameFrame {
         // Создать панель с вкладками
         multiPanel=new JTabbedPane();
         // Установить размеры панели с вкладками
-        multiPanel.setPreferredSize(new Dimension(400,400));
+        multiPanel.setPreferredSize(new Dimension(400,430));
         // Заполнить панель с вкладками
         fillTabbedPane();
 
@@ -47,7 +47,7 @@ public class GameFrame {
         // Добавляем палень игрового поля на прокручиваемую панель
         JScrollPane scrollGameFieldPanel=new JScrollPane(new GameFieldPanel());
         // Задать размер прокручиваемой панели
-        scrollGameFieldPanel.setPreferredSize(new Dimension(380,380));
+        scrollGameFieldPanel.setPreferredSize(new Dimension(380,400));
         multiPanel.addTab("Game field",scrollGameFieldPanel);
 
     }
