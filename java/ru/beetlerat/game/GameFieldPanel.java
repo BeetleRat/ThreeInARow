@@ -2,13 +2,13 @@ package ru.beetlerat.game;
 
 
 
-import ru.beetlerat.game.balls.Balls;
+import ru.beetlerat.game.balls.BallsGrid;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class GameFieldPanel extends JPanel {
-    private Balls balls;
+    private BallsGrid ballsGrid;
 
 
     GameFieldPanel(){
@@ -16,7 +16,7 @@ public class GameFieldPanel extends JPanel {
         setSize(new Dimension(380,400));
         // Установка границ компонента красными жирностью 5
         setBorder(BorderFactory.createLineBorder(Color.RED,5));
-        balls=new Balls(this);
+        ballsGrid =new BallsGrid(this);
     }
     // Переопределить метод отрисовки компанента
     protected void paintComponent(Graphics brush){
@@ -25,6 +25,6 @@ public class GameFieldPanel extends JPanel {
         // а затем рисуем на отрисованном компоненте
 
         // Отрисовка игрового поля
-        balls.drawBalls(brush);
+        ballsGrid.drawBalls(brush);
     }
 }
