@@ -86,6 +86,9 @@ abstract class BallMovement implements Runnable {
     BallMovement(BallsGrid ballsGrid, JComponent canvas, int row, int column, int id) {
         // Имя шарика
         this.ballName = id;
+        // Установка базовых параметров шара
+        this.width = 50;
+        this.height = 50;
         // Создание паралельного потока
         thread = new Thread(this, "Ball " + ballName + " thread");
         // Сохранение панели в которой отрисовывается шар
@@ -99,17 +102,16 @@ abstract class BallMovement implements Runnable {
         this.rightBallMovement = null;
 
         // Установка границ шара
-        this.floor = this.canvas.getSize().height - height - 20;
-        this.ceil = 0 + height / 2;
-        this.rightBorder = this.canvas.getSize().width - width;
+        this.floor =this.canvas.getPreferredSize().height -  height;
+        this.ceil =0+ height / 2;
+
+        this.rightBorder = this.canvas.getPreferredSize().width - width;
         this.leftBorder = 0 + width / 2;
         // Установка отступов от края игрового поля
         this.paddingX = 35;
         this.paddingY = 35;
 
-        // Установка базовых параметров шара
-        this.width = 30;
-        this.height = 30;
+
         // Установка изночальных координат по положению шара в таблице шаров
         setRow(row);
         setColumn(column);
@@ -322,7 +324,7 @@ abstract class BallMovement implements Runnable {
                 if (x > rightBorder) {
                     x = rightBorder;
                 }
-                if (x < leftBorder) {
+               if (x < leftBorder) {
                     x = leftBorder;
                 }
                 if (y < ceil) {

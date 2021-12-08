@@ -1,6 +1,7 @@
 package ru.beetlerat.game.balls;
 
 import ru.beetlerat.game.BallsStack;
+import ru.beetlerat.game.score.ScorePanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,6 +12,7 @@ import java.util.List;
 public class BallsGrid {
 
     private final JComponent canvas; // Панель, на которой будет производится отрисовка
+    private final ScorePanel scorePanel; // Панель вывода очков
     private BallMovement ballsArray[][]; // Таблица шаров
     // Размеры таблицы шаров
     private final int n;
@@ -33,9 +35,11 @@ public class BallsGrid {
     private int turnsLeft; // Ходы
     private Double scoreMultiply; // Множитель
 
-    public BallsGrid(JPanel canvas) {
+    public BallsGrid(JPanel canvas, ScorePanel scorePanel) {
         // Сохраняем панель отрисовки
         this.canvas = canvas;
+        // Сохраняем панель вывода очков
+        this.scorePanel=scorePanel;
         this.reverseBallsStack = new BallsStack();
         this.removeBalls = new LinkedHashMap<>();
         // Устанавливаем размеры таблицы шаров
@@ -65,6 +69,8 @@ public class BallsGrid {
         turnsLeft = 20;
         scoreMultiply = 1.0;
         isCorrectMove = false;
+        // Установить начальные значения на ScorePanel
+        refreshScorePanel();
     }
 
 
@@ -79,11 +85,6 @@ public class BallsGrid {
             }
         }
         draggedBallMovement.paintBall(brush); // Отрисовать перетаскиваемый шар поверх других
-
-        // Вывод счета
-        brush.setFont(new Font("2", Font.BOLD, 12));
-        Double percentMultiply = Math.ceil((scoreMultiply - 1) * 100);
-        brush.drawString("Счет: " + score + "; Ходов осталось: " + turnsLeft + "; Множитель: " + percentMultiply.intValue() + "%", 60, canvas.getHeight() - 35);
     }
 
     public synchronized void checkAvailable() {
@@ -208,13 +209,11 @@ public class BallsGrid {
             // Если в этом ходу была собрана комбинация
             if (isCorrectMove) {
                 turnsLeft--; // Засчитать ход
+                refreshScorePanel();
                 isCorrectMove = false;
                 canvas.repaint();
             }
 
-            if (turnsLeft == 0) {
-                System.exit(0);
-            }
         }
     }
 
@@ -279,6 +278,8 @@ public class BallsGrid {
                 if (score < 0) {
                     score = 0;
                 }
+                // Вывести значение счета на ScorePanel
+                refreshScorePanel();
             }
             removeBalls.clear(); // Очистить список шаров на удаление
             // Заменяем удаленные элемнты на вышестоящие
@@ -504,6 +505,15 @@ public class BallsGrid {
 
     public synchronized void decStandBalls() {
         standBalls--;
+    }
+
+    private void refreshScorePanel() {
+        // Выводим очки на панель очков
+        scorePanel.setScore(score);
+        scorePanel.setTurnsLeft(turnsLeft);
+        // Преобразуем множитель в проценты
+        Double percentMultiply = Math.ceil((scoreMultiply - 1) * 100);
+        scorePanel.setScoreMultiply(percentMultiply.intValue());
     }
 
     // Сеттеры
