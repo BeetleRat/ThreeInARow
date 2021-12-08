@@ -3,7 +3,7 @@ package ru.beetlerat.game.balls;
 import javax.swing.*;
 import java.awt.*;
 
-public class OrangeBall extends BallColor {
+public class OrangeBall extends BallView {
     // Цвет шара
     private Color color;
     // Очки за шар

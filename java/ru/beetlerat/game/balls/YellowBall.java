@@ -3,7 +3,7 @@ package ru.beetlerat.game.balls;
 import javax.swing.*;
 import java.awt.*;
 
-public class YellowBall extends BallColor {
+public class YellowBall extends BallView {
 
 
     // Конструктор

@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.IOException;
 
 // Класс
-public abstract class BallColor extends BallMovement {
+public abstract class BallView extends BallMovement {
     // Константы типов шаров
     public static final int YELLOW_BALL = 5;
     public static final int PINK_BALL = 4;
@@ -46,7 +46,7 @@ public abstract class BallColor extends BallMovement {
     // Удалось ли загрузить изображение
     protected boolean hasImage;
 
-    BallColor(BallsGrid ballsGrid, JComponent canvas, int row, int column, int id) {
+    BallView(BallsGrid ballsGrid, JComponent canvas, int row, int column, int id) {
         super(ballsGrid, canvas, row, column, id);
         color = null;
         hasImage = false;
