@@ -237,15 +237,15 @@ public class BallsGrid {
                     if (ballMovement.isExists()) {
                         amount++;
                         switch (ballMovement.getType()) {
-                            case BallColor.YELLOW_BALL:
+                            case BallView.YELLOW_BALL:
                                 turnsScore++;
                                 break;
-                            case BallColor.PINK_BALL:
+                            case BallView.PINK_BALL:
                                 multiplyScore = multiplyScore + 0.05;
-                            case BallColor.BLACK_BALL:
-                            case BallColor.BLUE_BALL:
-                            case BallColor.ORANGE_BALL:
-                            case BallColor.GREEN_BALL:
+                            case BallView.BLACK_BALL:
+                            case BallView.BLUE_BALL:
+                            case BallView.ORANGE_BALL:
+                            case BallView.GREEN_BALL:
                                 combinationScore = combinationScore + ballMovement.getPrice();
                                 break;
                         }
@@ -421,7 +421,7 @@ public class BallsGrid {
             }
             // Добавляем случайный шар на поле
             int ballType = randomInt.nextInt(6);
-            BallMovement newBallMovement = BallColor.createBall(ballType, this, this.canvas, row, column, row * m + column);
+            BallMovement newBallMovement = BallView.createBall(ballType, this, this.canvas, row, column, row * m + column);
             ballsArray[row][column] = newBallMovement;
             // До тех пор пока случайный шар образовывает комбинацию
         } while (isStreak(row, column));
