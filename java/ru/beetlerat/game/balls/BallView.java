@@ -1,5 +1,7 @@
 package ru.beetlerat.game.balls;
 
+import ru.beetlerat.game.support.ImageLoader;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -39,47 +41,21 @@ public abstract class BallView extends BallMovement {
 
     // Цвет шара
     protected Color color;
+    // Светлая вариация шара
+    protected boolean bright;
     // Объекты изображений
     protected Image darkIMG;
     protected Image lightIMG;
     protected Image drawIMG;
-    // Удалось ли загрузить изображение
-    protected boolean hasImage;
+    protected ImageLoader imageLoader;
 
     BallView(BallsGrid ballsGrid, JComponent canvas, int row, int column, int id) {
         super(ballsGrid, canvas, row, column, id);
+        imageLoader=new ImageLoader();
         color = null;
-        hasImage = false;
         lightIMG = null;
         darkIMG = null;
         drawIMG = null;
-    }
-
-    protected Image loadImage(String fileName) {
-        Image img = null;
-        try {
-            File imageFile = null;
-            // Получение файла из папки ресурсов
-            if (getClass().getClassLoader().getResource(fileName) != null) {
-                imageFile = new File(getClass().getClassLoader().getResource(fileName).getFile());
-                // Очистка изображения, если оно было до этого
-                if (img != null) {
-                    img.flush();
-                }
-                // Загрузка изображения из файла в объект img
-                img = ImageIO.read(imageFile).getScaledInstance(width, height, Image.SCALE_AREA_AVERAGING);
-                hasImage = true;
-            } else {
-                // Вывод в консоль сообщения об ошибке
-                System.out.println("Cannot load image file: " + fileName);
-                hasImage = false;
-            }
-
-        } catch (IOException exOb) {
-            // Вывод в консоль сообщения об ошибке
-            System.out.println("Cannot load image file: " + fileName);
-            hasImage = false;
-        }
-        return img;
+        bright=false;
     }
 }

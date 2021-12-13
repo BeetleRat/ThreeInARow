@@ -58,8 +58,8 @@ abstract class BallMovement implements Runnable {
         // Имя шарика
         this.ballName = id;
         // Установка базовых параметров шара
-        this.width = 50;
-        this.height = 50;
+        this.width = 60;
+        this.height = 60;
         // Создание паралельного потока
         thread = new Thread(this, "Ball " + ballName + " thread");
         // Сохранение панели в которой отрисовывается шар
@@ -479,12 +479,18 @@ abstract class BallMovement implements Runnable {
         }
     }
 
+
+
     abstract void paintBall(Graphics brush);
 
     abstract int getType();
 
     abstract int getPrice();
 
+    abstract boolean getBright();
+
     abstract void setBright(boolean isBright);
+
+
 
 }

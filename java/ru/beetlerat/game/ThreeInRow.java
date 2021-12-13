@@ -1,5 +1,7 @@
 package ru.beetlerat.game;
 
+import ru.beetlerat.game.UI.GameFrame;
+
 import javax.swing.*;
 
 public class ThreeInRow {

@@ -13,10 +13,10 @@ public class YellowBall extends BallView {
         // Установка цвета шара
         color=new Color(255,255,0);
         // Загрузка изображений
-        darkIMG=loadImage("yellowBallDark.png");
+        darkIMG=imageLoader.loadImage("yellowBallDark.png",width,height);
         drawIMG=darkIMG;
-        if(hasImage){
-            lightIMG=loadImage("yellowBallLight.png");
+        if(darkIMG!=null){
+            lightIMG=imageLoader.loadImage("yellowBallLight.png",width,height);
         }
     }
 
@@ -28,7 +28,7 @@ public class YellowBall extends BallView {
             Color brushColor = brush.getColor();
             // Отрисовать шар нужного цвета
             brush.setColor(color);
-            if (hasImage) {
+            if (drawIMG!=null) {
                 brush.drawImage(drawIMG, x, y, null);
             } else {
                 brush.fillOval(x, y, width, height);
@@ -47,9 +47,15 @@ public class YellowBall extends BallView {
     int getPrice() {
         return 0;
     }
+
+    @Override
+    boolean getBright() {
+        return bright;
+    }
+
     @Override
     void setBright(boolean isBright) {
-
+        this.bright=isBright;
         if(isBright){
             color=new Color(255,255,150);
             drawIMG=lightIMG;
