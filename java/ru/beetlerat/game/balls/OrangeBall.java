@@ -4,8 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class OrangeBall extends BallView {
-    // Цвет шара
-    private Color color;
+
     // Очки за шар
     private int price;
     // Конструктор
