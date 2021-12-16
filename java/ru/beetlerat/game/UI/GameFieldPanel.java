@@ -1,8 +1,6 @@
 package ru.beetlerat.game.UI;
 
-
 import ru.beetlerat.game.balls.BallsGrid;
-import ru.beetlerat.game.support.ImageLoader;
 
 import javax.swing.*;
 import java.awt.*;

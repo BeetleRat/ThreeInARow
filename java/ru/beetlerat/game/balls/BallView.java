@@ -2,11 +2,8 @@ package ru.beetlerat.game.balls;
 
 import ru.beetlerat.game.support.ImageLoader;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.io.File;
-import java.io.IOException;
 
 // Класс
 public abstract class BallView extends BallMovement {
@@ -19,7 +16,8 @@ public abstract class BallView extends BallMovement {
     public static final int BLACK_BALL = 0;
 
     // Фабричный метод создания шара определенного типа
-    public static BallMovement createBall(int ballType, BallsGrid anotherBallsGrid, JComponent canvas, int row, int column, int id) {
+    public static BallMovement createBall(int ballType, BallsGrid anotherBallsGrid,
+                                          JComponent canvas, int row, int column, int id) {
         switch (ballType) {
             case BLACK_BALL:
                 return new BlackBall(anotherBallsGrid, canvas, row, column, id);

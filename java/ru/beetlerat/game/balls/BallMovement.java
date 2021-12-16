@@ -16,10 +16,10 @@ abstract class BallMovement implements Runnable {
     private JComponent canvas;
     // Классы взаимодействия с другими шариками
     private BallsGrid ballsGrid;
-    private BallMovement upBallMovement;
-    private BallMovement downBallMovement;
-    private BallMovement leftBallMovement;
-    private BallMovement rightBallMovement;
+    private BallMovement upBall;
+    private BallMovement downBall;
+    private BallMovement leftBall;
+    private BallMovement rightBall;
 
     // Параметры шара
     private int ballName;
@@ -47,8 +47,8 @@ abstract class BallMovement implements Runnable {
     private int paddingY;
 
     private boolean isExists;
-    protected boolean isBallDragged;
-    protected boolean isTransported;// Перемещается ли данный шар другим шаром
+    private boolean isBallDragged;
+    private boolean isTransported;// Перемещается ли данный шар другим шаром
     private int isBallAvailable; // 0-шар еще не двигался 1-шар уже пришел в нужную точку 2 - шар еще движется в нужную точку
     private int isYChange; // 0 -шар стоит на месте/ 1-шар перемещается по Y/ -1 - шар перемещается по Х
 
@@ -67,10 +67,10 @@ abstract class BallMovement implements Runnable {
         // Сохранение игрового поля в котором находится шар
         this.ballsGrid = ballsGrid;
         // Обнуление соседей шара
-        this.upBallMovement = null;
-        this.downBallMovement = null;
-        this.leftBallMovement = null;
-        this.rightBallMovement = null;
+        this.upBall = null;
+        this.downBall = null;
+        this.leftBall = null;
+        this.rightBall = null;
 
         // Установка границ шара
         this.floor =this.canvas.getPreferredSize().height -  height;
@@ -81,7 +81,6 @@ abstract class BallMovement implements Runnable {
         // Установка отступов от края игрового поля
         this.paddingX = 35;
         this.paddingY = 35;
-
 
         // Установка изночальных координат по положению шара в таблице шаров
         setRow(row);
@@ -156,7 +155,6 @@ abstract class BallMovement implements Runnable {
                     checkBorders();
                     // Изменяем координаты соседей шара, на координаты соответствующие текущему положению самого шара
                     moveNeighbor();
-
                     canvas.repaint();// Перерисовываем изображение согласно новым координатам
                 }
             }
@@ -172,21 +170,21 @@ abstract class BallMovement implements Runnable {
                 if (x > columnX) {
                     // Вычисляем положительное расстояние на которое передвинулся шар
                     rangeX = Math.abs(x - columnX);
-                    neighbor = rightBallMovement;
+                    neighbor = rightBall;
                     signX = -1;
                 } else {
                     // Если шар передвигается влево
                     if (x < columnX) {
                         // Вычисляем положительное расстояние на которое передвинулся шар
                         rangeX = Math.abs(x - columnX);
-                        neighbor = leftBallMovement;
+                        neighbor = leftBall;
                         signX = 1;
                     } else {
                         // Если шар передвигается вниз
                         if (y > rowY) {
                             // Вычисляем положительное расстояние на которое передвинулся шар
                             rangeY = Math.abs(y - rowY);
-                            neighbor = downBallMovement;
+                            neighbor = downBall;
                             signY = -1;
 
                         } else {
@@ -194,7 +192,7 @@ abstract class BallMovement implements Runnable {
                             if (y < rowY) {
                                 // Вычисляем положительное расстояние на которое передвинулся шар
                                 rangeY = Math.abs(y - rowY);
-                                neighbor = upBallMovement;
+                                neighbor = upBall;
                                 signY = 1;
                             }
                         }
@@ -375,7 +373,6 @@ abstract class BallMovement implements Runnable {
                 }
             }
         }
-
     }
 
     // Геттеры
@@ -423,17 +420,17 @@ abstract class BallMovement implements Runnable {
     public void setTransported(boolean transported) {
         isTransported = transported;
     }
-    public void setUpBallMovement(BallMovement upBallMovement) {
-        this.upBallMovement = upBallMovement;
+    public void setUpBall(BallMovement upBall) {
+        this.upBall = upBall;
     }
-    public void setDownBallMovement(BallMovement downBallMovement) {
-        this.downBallMovement = downBallMovement;
+    public void setDownBall(BallMovement downBall) {
+        this.downBall = downBall;
     }
-    public void setLeftBallMovement(BallMovement leftBallMovement) {
-        this.leftBallMovement = leftBallMovement;
+    public void setLeftBall(BallMovement leftBall) {
+        this.leftBall = leftBall;
     }
-    public void setRightBallMovement(BallMovement rightBallMovement) {
-        this.rightBallMovement = rightBallMovement;
+    public void setRightBall(BallMovement rightBall) {
+        this.rightBall = rightBall;
     }
     public void setRow(int row) {
         this.row = row; // Сохраняем строку
@@ -462,10 +459,10 @@ abstract class BallMovement implements Runnable {
         if (!isExists) {
             // Выкидываем его за поле, что бы перед уничтожением он успел увеличить в таблице количество шаров на своем месте
             // но при этом пользователь не мог случайно с ним взаимодействовать
-            this.upBallMovement = null;
-            this.downBallMovement = null;
-            this.leftBallMovement = null;
-            this.rightBallMovement = null;
+            this.upBall = null;
+            this.downBall = null;
+            this.leftBall = null;
+            this.rightBall = null;
             this.width = 0;
             this.height = 0;
             this.paddingX = 0;
@@ -479,8 +476,6 @@ abstract class BallMovement implements Runnable {
         }
     }
 
-
-
     abstract void paintBall(Graphics brush);
 
     abstract int getType();
@@ -490,7 +485,4 @@ abstract class BallMovement implements Runnable {
     abstract boolean getBright();
 
     abstract void setBright(boolean isBright);
-
-
-
 }

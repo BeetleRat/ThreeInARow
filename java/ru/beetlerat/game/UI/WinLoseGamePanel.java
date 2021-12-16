@@ -25,8 +25,8 @@ public class WinLoseGamePanel extends JPanel implements Runnable {
     private ImageIcon winImage;
     private ImageIcon loseImage;
     private ImageIcon gameName;
-    private ImageIcon exitImage;
     private ImageIcon restartImage;
+    private ImageIcon exitImage;
 
     // Объекты панели
     private GameFieldPanel gameFieldPanel;
@@ -88,12 +88,9 @@ public class WinLoseGamePanel extends JPanel implements Runnable {
         restartButton.setBackground(new Color(0,0,0,0));
         restartButton.setBorderPainted(false);
 
-
-
         exitButton = new JButton(exitImage);
         exitButton.setBackground(new Color(0,0,0,0));
         exitButton.setBorderPainted(false);
-        //exitButton.setBorder(BorderFactory.createLineBorder(new Color(0,0,0,0),0));
 
         exitButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         exitButton.setAlignmentY(Component.CENTER_ALIGNMENT);
@@ -139,7 +136,6 @@ public class WinLoseGamePanel extends JPanel implements Runnable {
         // Отображать приоритетные шары на панели счета
         scorePanel.setPriorityVisible(true);
         windows.show(this, "Game panel");// Переключиться на карту Game panel
-
         newState = GAME_ON;
     }
 

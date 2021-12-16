@@ -37,8 +37,6 @@ public class Tutorial extends JDialog {
         setLayout(new FlowLayout());
         setResizable(false);// Запретить изменять размер окна
 
-
-
         totalPage = 11;
         currentPage = 1;
 
@@ -46,7 +44,6 @@ public class Tutorial extends JDialog {
         createElements();
         addListeners();
         addElementsToPanel();
-
     }
 
     private void createTutorialLists() {
@@ -133,7 +130,6 @@ public class Tutorial extends JDialog {
         tutorialText.add("В начале каждой игры определяются ослабленный и усиленный шары.\n" +
                 "Ослабленный шар приносит в 2 раза меньше очков, за собранную комбинацию.\n" +
                 "В то время как усиленный шар приносит в 2 раза больше очков за собранную комбинацию.");
-
     }
 
     private void createElements() {
@@ -176,6 +172,7 @@ public class Tutorial extends JDialog {
     }
 
     private void addListeners() {
+        // Добавить слушателя нажатия на кнпку nextButton
         nextButton.addActionListener((actionEvent) -> {
             if (currentPage == totalPage) {
                 dispose(); // Закрыть окно
@@ -191,6 +188,7 @@ public class Tutorial extends JDialog {
             }
         });
 
+        // Добавить слушателя нажатия на кнпку previousButton
         previousButton.addActionListener((actionEvent) -> {
             currentPage--;
             if (currentPage == 1) {

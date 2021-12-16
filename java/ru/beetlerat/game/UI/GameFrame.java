@@ -9,7 +9,9 @@ import java.awt.*;
 public class GameFrame {
     private JFrame mainFrame; // Отображаемая форма
     private ImageIcon ratImage; // Изображение крысы
-    //private Image backgroundImage;
+    private JPanel gameAndScore;
+    private WinLoseGamePanel winLoseGamePanel;
+    private ScorePanel scorePanel;
 
     public GameFrame() {
         // Создать новый контейнер типа JFrame с подписью Игра три в ряд
@@ -27,13 +29,13 @@ public class GameFrame {
         // Создать меню
         new ApplicationMenu(mainFrame);
 
-
         // Упаковываем WinLoseGamePanel и SorePanel в панель gameAndScore
-        JPanel gameAndScore = new JPanel();
+        gameAndScore = new JPanel();
         gameAndScore.setOpaque(false);// Сделать фон прозрачным
-        ScorePanel mySorePanel = new ScorePanel();
-        gameAndScore.add(new WinLoseGamePanel(mySorePanel));
-        gameAndScore.add(mySorePanel);
+        scorePanel = new ScorePanel();
+        winLoseGamePanel=new WinLoseGamePanel(scorePanel);
+        gameAndScore.add(winLoseGamePanel);
+        gameAndScore.add(scorePanel);
         // Добавляем панель gameAndScore на форму в 1 строку 1 столбец
         mainFrame.add(gameAndScore);
 

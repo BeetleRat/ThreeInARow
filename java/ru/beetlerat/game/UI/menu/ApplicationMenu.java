@@ -1,6 +1,5 @@
 package ru.beetlerat.game.UI.menu;
 
-
 import javax.swing.*;
 
 public class ApplicationMenu extends JMenuBar {
@@ -30,7 +29,7 @@ public class ApplicationMenu extends JMenuBar {
     }
 
     private void addListeners(){
-
+        // Добавить слушателя для нажатия пункта меню tutorialItem
         tutorialItem.addActionListener((actionEvent)->{
             tutorial=new Tutorial(mainFrame,"Обучение");
             tutorial.setVisible(true);
@@ -38,6 +37,4 @@ public class ApplicationMenu extends JMenuBar {
         // По нажатию пункта меню завершить приложения
         exitItem.addActionListener((actionEvent)->System.exit(0));
     }
-
-
 }

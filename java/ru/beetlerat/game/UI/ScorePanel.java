@@ -38,7 +38,6 @@ public class ScorePanel extends JPanel implements Runnable {
     private final int scoreBarWidth;
     private final int barY;
 
-
     public ScorePanel() {
         // Создаем новый паралельный поток "Score thread"
         thread = new Thread(this, "Score thread");
@@ -120,7 +119,10 @@ public class ScorePanel extends JPanel implements Runnable {
     //Сеттеры
     public void setScore(int score) {
         this.score = score;
-        this.fillScoreBar = Math.ceil(((double) score / ((double) winScore / 100)) * ((double) (scoreBarWidth - 1) / 100));
+        if(this.score>winScore){
+            this.score=winScore;
+        }
+        this.fillScoreBar = Math.ceil(((double) this.score / ((double) winScore / 100)) * ((double) (scoreBarWidth - 1) / 100));
         repaint();
     }
 
@@ -131,7 +133,10 @@ public class ScorePanel extends JPanel implements Runnable {
 
     public void setScoreMultiply(int scoreMultiply) {
         this.scoreMultiply = scoreMultiply;
-        this.fillScoreMultiplyBar = Math.ceil(scoreMultiply * ((double) (55 - 1) / 100));
+        if(this.scoreMultiply>100){
+            this.scoreMultiply=100;
+        }
+        this.fillScoreMultiplyBar = Math.ceil(this.scoreMultiply * ((double) (55 - 1) / 100));
         repaint();
     }
 
@@ -156,11 +161,9 @@ public class ScorePanel extends JPanel implements Runnable {
     public int getWinScore() {
         return winScore;
     }
-
     public int getCurrentScore() {
         return currentScore;
     }
-
     public int getTurnsLeft() {
         return turnsLeft;
     }

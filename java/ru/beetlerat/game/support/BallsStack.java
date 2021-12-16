@@ -14,12 +14,12 @@ public class BallsStack {
         columns=new ArrayList<>();
     }
 
-
     public void push(int row, int column){
         size++;
         rows.add(size-1,row);
         columns.add(size-1,column);
     }
+
     public int[] pop(){
         if(size>0){
             int responseMass[] = new int[2];
@@ -32,6 +32,7 @@ public class BallsStack {
         }
         return null;
     }
+
     public int[] showByIndex(int index){
         int responseMass[] = new int[2];
         if(size==0||index<0||index>=size){
@@ -48,6 +49,7 @@ public class BallsStack {
             size--;
         }
     }
+
     public int[] showTop(){
 
         int responseMass[] = new int[2];

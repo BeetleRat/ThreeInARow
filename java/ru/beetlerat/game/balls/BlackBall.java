@@ -4,7 +4,6 @@ import javax.swing.*;
 import java.awt.*;
 
 public class BlackBall extends BallView {
- 
     // Очки за шар
     private int price;
     // Конструктор

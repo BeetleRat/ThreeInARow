@@ -15,14 +15,14 @@ public class BallsGrid {
     private final ScorePanel scorePanel; // Панель вывода очков
     private BallMovement ballsArray[][]; // Таблица шаров
     // Размеры таблицы шаров
-    private final int n;
-    private final int m;
+    private final int rowTotal;
+    private final int columnTotal;
     // Стэк запоминающий перестановку шаров в пределах одного хода
     private BallsStack reverseBallsStack;
     // Отображение хранящее в себе удаляемые комбинации
     private Map<Integer, List<BallMovement>> removeBalls;
     // Перетаскиваемый шар отрисовывается поверх других
-    private BallMovement draggedBallMovement;
+    private BallMovement draggedBall;
     // Количество шаров стоящих на своих местах
     private int standBalls;
 
@@ -46,12 +46,12 @@ public class BallsGrid {
         this.reverseBallsStack = new BallsStack();
         this.removeBalls = new LinkedHashMap<>();
         // Устанавливаем размеры таблицы шаров
-        this.n = 7;
-        this.m = 9;
+        this.rowTotal = 7;
+        this.columnTotal = 9;
         // Создаем таблицу шаров
-        ballsArray = new BallMovement[n][];
-        for (int row = 0; row < n; row++) {
-            ballsArray[row] = new BallMovement[m];
+        ballsArray = new BallMovement[rowTotal][];
+        for (int row = 0; row < rowTotal; row++) {
+            ballsArray[row] = new BallMovement[columnTotal];
         }
         // Заполняем таблицу шарами
         startNewGame();
@@ -59,8 +59,8 @@ public class BallsGrid {
 
     public void restartGame() {
         // Удаляем предыдущие шары
-        for (int row = n - 1; row >= 0; row--) {
-            for (int column = m - 1; column >= 0; column--) {
+        for (int row = rowTotal - 1; row >= 0; row--) {
+            for (int column = columnTotal - 1; column >= 0; column--) {
                 ballsArray[row][column].setExists(false);
                 ballsArray[row][column] = null;
             }
@@ -71,21 +71,21 @@ public class BallsGrid {
 
     private void startNewGame() {
         // Заполняем таблицу случайными шарами
-        for (int row = 0; row < n; row++) {
-            for (int column = 0; column < m; column++) {
+        for (int row = 0; row < rowTotal; row++) {
+            for (int column = 0; column < columnTotal; column++) {
                 createRandomBall(row, column);
             }
         }
         // Устанавлива соседей для всех шаров из таблицы
-        for (int row = 0; row < n; row++) {
-            for (int column = 0; column < m; column++) {
+        for (int row = 0; row < rowTotal; row++) {
+            for (int column = 0; column < columnTotal; column++) {
                 setNeighborsBalls(row, column);
             }
         }
         // Устанавливаем шар отрисовывающийся поверх других
-        draggedBallMovement = ballsArray[n - 1][m - 1];
+        draggedBall = ballsArray[rowTotal - 1][columnTotal - 1];
         // Заного устанавливаем параметры счета
-        standBalls = n * m; // Количество доступных шаров
+        standBalls = rowTotal * columnTotal; // Количество доступных шаров
         isFieldAvailable = true;
         isEndTurnPhase = false;
         score = 0;
@@ -107,20 +107,20 @@ public class BallsGrid {
 
     public void drawBalls(Graphics brush) {
         // Отрисовать каждый шар из таблицы шаров
-        for (int row = n - 1; row >= 0; row--) {
-            for (int column = m - 1; column >= 0; column--) {
+        for (int row = rowTotal - 1; row >= 0; row--) {
+            for (int column = columnTotal - 1; column >= 0; column--) {
                 if (ballsArray[row][column] != null) {
                     ballsArray[row][column].paintBall(brush);
                 }
             }
         }
-        draggedBallMovement.paintBall(brush); // Отрисовать перетаскиваемый шар поверх других
+        draggedBall.paintBall(brush); // Отрисовать перетаскиваемый шар поверх других
     }
 
     // Проверить доступно ли игровое поле для взаимодействия
     public synchronized void checkAvailable() {
         // Если все шары в сетке находятся на своих местах
-        if (standBalls == m * n) {
+        if (standBalls == columnTotal * rowTotal) {
             // Они только что туда пришли
             if (!isFieldAvailable) {
                 // Разрешить пользователю использовать поле
@@ -140,10 +140,10 @@ public class BallsGrid {
 
     // Проверка комбинаций во всей табице шаров
     private void checkCombinations() {
-        int row = n - 1;
+        int row = rowTotal - 1;
         boolean isBallInCombination;
         while (row >= 0) {
-            int column = m - 1;
+            int column = columnTotal - 1;
             while (column >= 0) {
                 isBallInCombination = false;
                 // Получить множество из отображений
@@ -259,7 +259,6 @@ public class BallsGrid {
                 isCorrectMove = false;
                 canvas.repaint();
             }
-
         }
     }
 
@@ -275,9 +274,6 @@ public class BallsGrid {
                 int combinationScore = 0;
                 int turnsScore = 0;
                 double multiplyScore = 0;
-
-                int scoreX = 0;
-                int scoreY = 0;
 
                 for (BallMovement ballMovement : SetIt.getValue()) {
                     if (ballMovement.isExists()) {
@@ -305,8 +301,6 @@ public class BallsGrid {
                         }
                         // Убираем шар из таблицы шаров
                         ballsArray[ballMovement.getRow()][ballMovement.getColumn()] = null;
-                        scoreX = ballMovement.getColumnX();
-                        scoreY = ballMovement.getRowY();
                         // Уничтожаем шар
                         ballMovement.setExists(false);
 
@@ -336,16 +330,16 @@ public class BallsGrid {
             }
             removeBalls.clear(); // Очистить список шаров на удаление
             // Заменяем удаленные элемнты на вышестоящие
-            for (int row = n - 1; row >= 0; row--) {
-                for (int column = m - 1; column >= 0; column--) {
+            for (int row = rowTotal - 1; row >= 0; row--) {
+                for (int column = columnTotal - 1; column >= 0; column--) {
                     if (ballsArray[row][column] == null) {
                         dropTheBall(row - 1, column);
                     }
                 }
             }
             // Установить соседей новым шарам
-            for (int row = n - 1; row >= 0; row--) {
-                for (int column = m - 1; column >= 0; column--) {
+            for (int row = rowTotal - 1; row >= 0; row--) {
+                for (int column = columnTotal - 1; column >= 0; column--) {
                     setNeighborsBalls(row, column);
                 }
             }
@@ -353,7 +347,7 @@ public class BallsGrid {
     }
 
     private synchronized void dropTheBall(int row, int column) {
-        if (row < -1 || row >= n || column < 0 || column >= m) {
+        if (row < -1 || row >= rowTotal || column < 0 || column >= columnTotal) {
             System.out.println("Попытка уронить не существующий шар: [" + row + ", " + column + "]");
         } else {
             // Если роняется шар не из верхнего ряда
@@ -447,7 +441,7 @@ public class BallsGrid {
     // Проверка являются являются ли элементы сосденими
     private boolean isSameLine(int row, int column, int row1, int column1) {
         // Если один из элементов является недопустимым
-        if (row < 0 || row >= n || column < 0 || column >= m || row1 < 0 || row1 >= n || column1 < 0 || column1 >= m) {
+        if (row < 0 || row >= rowTotal || column < 0 || column >= columnTotal || row1 < 0 || row1 >= rowTotal || column1 < 0 || column1 >= columnTotal) {
             return false;
         }
         // Если элементы являются соседними элементами по строке
@@ -478,7 +472,8 @@ public class BallsGrid {
             // Добавляем случайный шар на поле
             int ballType = randomInt.nextInt(6);
             // Корректируем частоту выпадения особых шаров
-            while (ballType == BallView.YELLOW_BALL || ballType == BallView.BLACK_BALL || ballType == BallView.PINK_BALL) {
+            while (ballType == BallView.YELLOW_BALL || ballType == BallView.BLACK_BALL ||
+                    ballType == BallView.PINK_BALL) {
                 if (pinkBallChance <= 0) {
                     pinkBallChance = randomInt.nextInt(1);
                     break;
@@ -503,20 +498,22 @@ public class BallsGrid {
                     yellowBallChance--;
                 }
             }
-            BallMovement newBallMovement = BallView.createBall(ballType, this, this.canvas, row, column, row * m + column);
+            BallMovement newBallMovement =
+                    BallView.createBall(ballType, this, this.canvas,
+                                        row, column, row * columnTotal + column);
             ballsArray[row][column] = newBallMovement;
             // До тех пор пока случайный шар образовывает комбинацию
         } while (isStreak(row, column));
     }
 
     private boolean isBallExistsInGrid(int row, int column) {
-        if (row < 0 || row >= n) {
+        if (row < 0 || row >= rowTotal) {
             return false;
         }
         if (ballsArray[row] == null) {
             return false;
         }
-        if (column < 0 || column >= m) {
+        if (column < 0 || column >= columnTotal) {
             return false;
         }
         if (ballsArray[row][column] == null) {
@@ -601,7 +598,7 @@ public class BallsGrid {
 
     // Сеттеры
     private void setNeighborsBalls(int row, int column) {
-        if (row < 0 || row >= n || column < 0 || column >= m) {
+        if (row < 0 || row >= rowTotal || column < 0 || column >= columnTotal) {
             System.out.println("Не корректные данные установки соседних шаров: " + row + "; " + column);
         } else {
             if (ballsArray[row][column] == null) {
@@ -610,16 +607,16 @@ public class BallsGrid {
                 // Устанавливаем выбранный шар
                 BallMovement currentBallMovement = ballsArray[row][column];
                 // Устанавливаем всех соседей для выбранного шара
-                currentBallMovement.setRightBallMovement(getBall(row, column + 1));
-                currentBallMovement.setLeftBallMovement(getBall(row, column - 1));
-                currentBallMovement.setUpBallMovement(getBall(row - 1, column));
-                currentBallMovement.setDownBallMovement(getBall(row + 1, column));
+                currentBallMovement.setRightBall(getBall(row, column + 1));
+                currentBallMovement.setLeftBall(getBall(row, column - 1));
+                currentBallMovement.setUpBall(getBall(row - 1, column));
+                currentBallMovement.setDownBall(getBall(row + 1, column));
             }
         }
     }
 
     public void setDraggedBall(int row, int column) {
-        draggedBallMovement = ballsArray[row][column];
+        draggedBall = ballsArray[row][column];
     }
 
     public void setEndTurnPhase(boolean endTurnPhase) {
@@ -644,11 +641,9 @@ public class BallsGrid {
     }
 
     public synchronized BallMovement getBall(int row, int column) {
-        if (row < 0 || row >= n || column < 0 || column >= m) {
+        if (row < 0 || row >= rowTotal || column < 0 || column >= columnTotal) {
             return null;
         }
         return ballsArray[row][column];
     }
-
-
 }
